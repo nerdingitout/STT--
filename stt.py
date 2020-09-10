@@ -73,12 +73,14 @@ for i in range(len(word)):
     if(i==(len(word)-1)):
         transcript_str+=" "+word[i]
         transcript_str = transcript_str.replace("%HESITATION", "")
+        transcript_str=transcript_str.lower()
         transcript.append(transcript_str)
         speaker_transcript.append(speaker[i])
     elif(speaker[i]==speaker[i+1]):
         transcript_str+=" "+word[i]
     else:
         transcript_str = transcript_str.replace(" %HESITATION ", "")
+        transcript_str=transcript_str.lower()
         transcript.append(transcript_str)
         speaker_transcript.append(speaker[i])
         transcript_str=""
