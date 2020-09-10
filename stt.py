@@ -69,25 +69,41 @@ df.to_csv('helllooooo.csv',index=True)
 transcript_str = ""
 transcript = []
 speaker_transcript = []
+client =[]
+agent = []
 for i in range(len(word)):
     if(i==(len(word)-1)):
         transcript_str+=" "+word[i]
-        transcript_str = transcript_str.replace("%HESITATION", "")
+        transcript_str = transcript_str.replace('%HESITATION', '')
         transcript_str=transcript_str.lower()
         transcript.append(transcript_str)
+        if speaker[i]==0:
+            speaker[i]='client'
+            client.append(transcript_str)
+        elif speaker[i]==1:
+            speaker[i]='agent'
+            agent.append(transcript_str)
+
         speaker_transcript.append(speaker[i])
     elif(speaker[i]==speaker[i+1]):
         transcript_str+=" "+word[i]
     else:
-        transcript_str = transcript_str.replace(" %HESITATION ", "")
+        transcript_str = transcript_str.replace('%HESITATION', '')
         transcript_str=transcript_str.lower()
         transcript.append(transcript_str)
+        if speaker[i]==0:
+            speaker[i]='client'
+            client.append(transcript_str)
+
+        elif speaker[i]==1:
+            speaker[i]='agent'
+            agent.append(transcript_str)
         speaker_transcript.append(speaker[i])
         transcript_str=""
 
 #output transcript and speaker into csv file
-output = {'Transcript':transcript, 'speaker':speaker_transcript}
+output = {'Client':client, 'Agent':agent}
 df = pd.DataFrame(data=output)
-df.to_csv('transcript_speaker.csv',index=True)
+df.to_csv('transcript_speaker1.csv',index=True)
 
 print(transcript)
