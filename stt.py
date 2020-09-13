@@ -1,3 +1,4 @@
+
 #Python Program To Use IBM Watson 
 # Studio's Speech To Text Below Code 
 # Accepts only .mp3 Format of Audio file  
@@ -13,15 +14,15 @@ import pandas as pd
 #STT code
 # Insert API Key in place of  
 # 'YOUR UNIQUE API KEY' 
-authenticator = IAMAuthenticator('C_1TyRl0w1rBHDJuz4RMbQZBZGhIzKjgbeegjL3RleSG')
+authenticator = IAMAuthenticator('L7TjOs4c3uLRC1Bo8ase4WNnQctkXzl4V5QhDeaTNBaU')
 service = SpeechToTextV1(authenticator = authenticator) 
    
 #Insert URL in place of 'API_URL'  
-service.set_service_url('https://api.eu-gb.speech-to-text.watson.cloud.ibm.com/instances/4504d974-dd28-4a72-9a17-8d25d5818858') 
+service.set_service_url('https://api.us-south.speech-to-text.watson.cloud.ibm.com/instances/84bee29a-fbfb-4478-b663-dee53f596234') 
    
 # Insert local mp3 file path in place of 'LOCAL FILE PATH'  
-with open(join(dirname('__file__'), r'./audio2.mp3'), #need to make this dynamic for different file names
-          'rb') as audio_file: 
+#with open(join(dirname('__file__'), r'./audio2.mp3'), #need to make this dynamic for different file names
+with open('audio2.mp3', 'rb') as audio_file: 
       
         dic = json.loads( 
                 json.dumps( 
@@ -31,79 +32,80 @@ with open(join(dirname('__file__'), r'./audio2.mp3'), #need to make this dynamic
                         model='en-US_NarrowbandModel', #model
                         speaker_labels="true", #speaker labels to identify multiple speakers
                     continuous=True).get_result(), indent=2)) 
-  
-# Stores the transcribed text 
 
-#print(dic['results'][0])
-transcript = []
-word = []
-end = []
-speaker = []
-start_s = []
-end_s = []
+
+  
+
+
+
+
 
 #We are looking to create a dictionary of the words & speakers, both should be of the same size
 #the start & end of timestamps don't match for the 'results' array and 'speaker_labels' array, therefore it's useless, we would need to do some extra manipulation to make it work
 
-#print(dic['results'][0]['alternatives'][0]['transcript']) #test print of transcript
+word = []
+speaker = []
 
 for i in range (len(dic['results'])):
-    #transcript.append(dic['results'][i]['alternatives'][0]['transcript']) #we don't really need this right now
+    
     for j in range (len(dic['results'][i]['alternatives'][0]['timestamps'])): #for loop, getting each recognized to put in dictionary 
         word.append(dic['results'][i]['alternatives'][0]['timestamps'][j][0]) #getting the words from the timestamps array. j refers to the timestamps object element that consists of {word, start, end}, 0 index at the end is for the word we want to extract and append to array
-        #end.append(dic['results'][i]['alternatives']) #we dont really need it
 
 for i in range (len(dic['speaker_labels'])):
     speaker.append(dic['speaker_labels'][i]['speaker']) #we only need this
-    #start_s.append(dic['speaker_labels'][i]['from'])
-    #end_s.append(dic['speaker_labels'][i]['to'])
+   
+clean_words=[]
+clean_speakers=[]
 
-
+#Creating new lists without the "%HESITATION"
+for i in range (len(word)):
+    if (word[i] != '%HESITATION'):
+        clean_words.append(word[i])
+        clean_speakers.append(speaker[i])
+      
 #output word and speaker into csv file
-output = {'word':word, 'speaker':speaker}
+output = {'word':clean_words, 'speaker':clean_speakers}
 df = pd.DataFrame(data=output)
 df.to_csv('helllooooo.csv',index=True)
 
-#we will need to append the words for each speaker
 
+
+#Reconstructing every sentence with its corresponding speaker
 transcript_str = ""
-transcript = []
 speaker_transcript = []
 client =[]
 agent = []
-for i in range(len(word)):
-    if(i==(len(word)-1)):
-        transcript_str+=" "+word[i]
-        transcript_str = transcript_str.replace('%HESITATION', '')
-        transcript_str=transcript_str.lower()
-        transcript.append(transcript_str)
-        if speaker[i]==0:
-            speaker[i]='client'
-            client.append(transcript_str)
-        elif speaker[i]==1:
-            speaker[i]='agent'
-            agent.append(transcript_str)
 
-        speaker_transcript.append(speaker[i])
-    elif(speaker[i]==speaker[i+1]):
-        transcript_str+=" "+word[i]
+for i in range(len(clean_speakers)):
+    if i==0:
+        current_speaker= clean_speakers[i]
+       
+    if current_speaker == clean_speakers[i]:
+        transcript_str += clean_words[i]+" "
+        
     else:
-        transcript_str = transcript_str.replace('%HESITATION', '')
-        transcript_str=transcript_str.lower()
-        transcript.append(transcript_str)
-        if speaker[i]==0:
-            speaker[i]='client'
-            client.append(transcript_str)
+        if current_speaker == 0:
+            client.append(transcript_str.lower())
+        else:
+            agent.append(transcript_str.lower())
 
-        elif speaker[i]==1:
-            speaker[i]='agent'
-            agent.append(transcript_str)
-        speaker_transcript.append(speaker[i])
-        transcript_str=""
+        transcript_str = ""
+        transcript_str += clean_words[i]+" "
 
+        current_speaker = clean_speakers[i]
+
+    if (i==len(clean_speakers)-1):
+        if current_speaker == 0:
+            client.append(transcript_str.lower())
+        else:
+            agent.append(transcript_str.lower())    
+        #transcript_str = ""    
+
+            
 #output transcript and speaker into csv file
 output = {'Client':client, 'Agent':agent}
 df = pd.DataFrame(data=output)
-df.to_csv('transcript_speaker1.csv',index=True)
+df.to_csv('transcript_speaker2.csv',index=True)
 
-print(transcript)
+#print(transcript)
+
