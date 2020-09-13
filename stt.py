@@ -10,15 +10,16 @@ from ibm_watson import SpeechToTextV1
 from ibm_watson.websocket import RecognizeCallback, AudioSource 
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator 
 import pandas as pd 
-
+import config
 #STT code
 # Insert API Key in place of  
 # 'YOUR UNIQUE API KEY' 
-authenticator = IAMAuthenticator('L7TjOs4c3uLRC1Bo8ase4WNnQctkXzl4V5QhDeaTNBaU')
+
+authenticator = IAMAuthenticator(config.STT_API_KEY)
 service = SpeechToTextV1(authenticator = authenticator) 
    
 #Insert URL in place of 'API_URL'  
-service.set_service_url('https://api.us-south.speech-to-text.watson.cloud.ibm.com/instances/84bee29a-fbfb-4478-b663-dee53f596234') 
+service.set_service_url(config.STT_URL) 
    
 # Insert local mp3 file path in place of 'LOCAL FILE PATH'  
 #with open(join(dirname('__file__'), r'./audio2.mp3'), #need to make this dynamic for different file names
@@ -107,5 +108,5 @@ output = {'Client':client, 'Agent':agent}
 df = pd.DataFrame(data=output)
 df.to_csv('transcript_speaker2.csv',index=True)
 
-#print(transcript)
+print(output)
 
